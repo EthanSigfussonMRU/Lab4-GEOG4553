@@ -23,7 +23,7 @@ def gdf_to_train_test_data(gdf):
     """splits geodataframe to training and testing features"""
     pass
 
-def train_model(model, X_train y_train ):
+def train_model(model, X_train, y_train ):
     """
     
     """
@@ -31,6 +31,7 @@ def train_model(model, X_train y_train ):
 
 #format data
 gdf = shapefile_to_gdf("Study Area.shp")
+print(gdf)
 #split to training and test data
 X_train, X_test, y_train, y_test = gdf_to_train_test_data(gdf)
 
