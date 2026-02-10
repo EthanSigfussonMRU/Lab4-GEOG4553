@@ -13,28 +13,33 @@ warnings.filterwarnings('ignore')
 
 
 def train_validate_and_predict(model, X, y):
-    model.fit()
+    """
+    trains a m
+    """
+    model.fit(X, y)
+
+    #get model name
+    model_name = type(model).__name__
 
     #cross validation scores
     cv_scores = cross_val_score(model, X, y, cv=5, scoring='r2')
-    print(f"Scores: for {model=}{cv_scores}")
+    print(f"Cross validation scores: for {model_name}\n{cv_scores}")
     print(f"Mean: {cv_scores.mean():.2f}")
 
     #cross val predictions
     y_pred = cross_val_predict(model, X, y, cv=5)
-    print(f"\n--- XGBoost Results ---")
-    
+
     #validation performance
     mse = mean_squared_error(y, y_pred)
     r2 = r2_score(y, y_pred)
     
-    print(f"\n--- {model=} Results ---")
+    print(f"\n--- {model_name} validation performance ---")
     print(f"MSE: {mse:.4f}")
     print(f"R2 Score: {r2:.4f}")
 
 
     #residual graphing
-    print("close graph to advance program")
+    print("Graph saved in Figures, close graph to advance program\n")
 
     res = y - y_pred
 
@@ -43,8 +48,6 @@ def train_validate_and_predict(model, X, y):
     sns.scatterplot(x=y_pred, y=res, ax=ax1, alpha=0.5, color='steelblue')
     ax1.axhline(0, color='red', linestyle='--')
 
-    #get model name
-    model_name = type(model).__name__
     
     ax1.set_title(f"{model_name} Residuals")
     ax1.set_xlabel('Predicted Values')
