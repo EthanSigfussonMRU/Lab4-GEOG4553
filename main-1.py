@@ -1,12 +1,23 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sklearn
+import warnings
 import xgboost as xgb
-from sklearn.datasets import make_regression
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import f1_score
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import cross_val_score
+from sklearn.datasets import make_regression
 
 
 def shapefile_to_gdf (file):
     """formats to shapefiles to geodata frame"""
-    pass
+    gdf = pd.read_file(file)
+    return gdf
 
 def gdf_to_train_test_data(gdf):
     """splits geodataframe to training and testing features"""
