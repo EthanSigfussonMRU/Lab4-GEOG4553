@@ -1,2 +1,3 @@
 Figures/{model_type}_residuals.png
-Figures
+Figures/RandomForestRegressor_residuals.png
+Figures/XGBRegressor_residuals.png
