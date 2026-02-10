@@ -61,15 +61,14 @@ def train_validate_and_predict(model, X, y):
 
 
 
-#format data
+
+#1) Bring the GIS data into Python
+
 gdf = gpd.read_file(".\\Shapefiles\\Study Area.shp")
 # print(gdf.head())
 # print(gdf.info())
-
-#1) Bring the GIS data into Python
 X = gdf.iloc[:,1:2].values
 y = gdf.iloc[:,2].values
-
 
 
 #2) Train and validate models on “Study Area”
