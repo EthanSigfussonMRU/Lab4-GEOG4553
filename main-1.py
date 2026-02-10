@@ -1,4 +1,4 @@
-import pandas as pd
+import geopandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sklearn
@@ -31,7 +31,7 @@ def train_model(model, X_train, y_train ):
 
 #format data
 gdf = shapefile_to_gdf("Study Area.shp")
-print(gdf)
+print(gdf.head())
 #split to training and test data
 X_train, X_test, y_train, y_test = gdf_to_train_test_data(gdf)
 
