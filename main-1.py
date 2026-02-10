@@ -1,67 +1,83 @@
-import geopandas as gpd
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import sklearn
 import warnings
+
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
+import sklearn
 import xgboost as xgb
 from sklearn.datasets import make_regression
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
+from sklearn.impute import KNNImputer
+from sklearn.metrics import f1_score, mean_squared_error, r2_score
+from sklearn.model_selection import (cross_val_predict, cross_val_score,
+                                     train_test_split)
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+
+warnings.filterwarnings('ignore')
 
 
-def shapefile_to_gdf (file):
-    """formats to shapefiles to geodata frame"""
-    pass
 
-def gdf_to_train_test_data(gdf):
-    """splits geodataframe to training and testing features"""
-    pass
-
-def train_model(model, X_train y_train ):
-    """
-    
-    """
-    pass
 
 #format data
-gdf = shapefile_to_gdf(".\\Shapefiles\\Study Area.shp")
+gdf = gpd.read_file(".\\Shapefiles\\Study Area.shp")
 print(gdf.head())
 print(gdf.info())
 
-X_FB = gdf.iloc[:,1:2].values
-y_FB = gdf.iloc[:,2].values
 
-label_encoder = LabelEncoder()
-x_categorical = gdf.select_dtypes(include=['object']).apply(label_encoder.fit_transform)
-x_numerical = gdf.select_dtypes(exclude=['object']).values
-x = pd.concat([pd.DataFrame(x_numerical), x_categorical], axis=1).values
+X = gdf.iloc[:,1:2].values
+y = gdf.iloc[:,2].values
 
-regressor = RandomForestRegressor(n_estimators=10, random_state=0, oob_score=True)
-
-regressor.fit(x, y_FB)
-
-oob_score = regressor.oob_score_
-print(f'Out-of-Bag Score: {oob_score}')
-
-predictions = regressor.predict(x)
-
-mse = mean_squared_error(y_FB, predictions)
-print(f'Mean Squared Error: {mse}')
-
-r2 = r2_score(y_FB, predictions)
-print(f'R-squared: {r2}')
-#split to training and test data
-#X_train, X_test, y_train, y_test = gdf_to_train_test_data(gdf)
-
-#initiallize models
-#xgb_model = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=100,)
-#rf_model = RandomForestRegressor(n_estimators=10, random_state=0, oob_score=True)
+#initialize models
+rf_model = RandomForestRegressor(n_estimators=100, random_state=0)
+xgb_model = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=100, learning_rate=0.1)
 
 
-#train using five fold cross val
-rf_r2 = cross_val_score(rf_model, X, y, cv=5, scoring='r2')
-xgb_r2 = cross_val_score(xgb_model, X, y, cv=5, scoring='r2')
+#cross validation scores
+rf_cv_scores = cross_val_score(rf_model, X, y, cv=5, scoring='r2')
+xgb_cv_scores = cross_val_score(xgb_model, X, y, cv=5, scoring='r2')
+
+
+print(f"Scores: {rf_cv_scores}")
+print(f"Mean: {rf_cv_scores.mean():.2f}")
+
+print(f"Scores: {xgb_cv_scores}")
+print(f"Mean: {xgb_cv_scores.mean():.2f}")
+
+#cross val predictions
+y_rf_pred = cross_val_predict(rf_model, X, y, cv=5)
+y_xgb_pred = cross_val_predict(xgb_model, X, y, cv=5)
+
+#score validation
+mse_xgb = mean_squared_error(y, y_xgb_pred)
+r2_xgb = r2_score(y, y_xgb_pred)
+
+print(f"\n--- XGBoost Results ---")
+print(f"MSE: {mse_xgb:.4f}")
+print(f"R2 Score: {r2_xgb:.4f}")
+
+#residual graphing
+res_rf = y - y_rf_pred
+res_xgb = y - y_xgb_pred
+
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6), sharey=True)
+# Random Forest Plot
+sns.scatterplot(x=y_rf_pred, y=res_rf, ax=ax1, alpha=0.5, color='steelblue')
+ax1.axhline(0, color='red', linestyle='--')
+ax1.set_title('Random Forest Residuals')
+ax1.set_xlabel('Predicted Values')
+ax1.set_ylabel('Residuals')
+
+# XGBoost Plot
+sns.scatterplot(x=y_xgb_pred, y=res_xgb, ax=ax2, alpha=0.5, color='darkorange')
+ax2.axhline(0, color='red', linestyle='--')
+ax2.set_title('XGBoost Residuals')
+ax2.set_xlabel('Predicted Values')
+
+plt.tight_layout()
+plt.show()
+
+
+gdf_all_tracts = gpd.read_file(".\\Shapefiles\\All Census Tracts.shp")
