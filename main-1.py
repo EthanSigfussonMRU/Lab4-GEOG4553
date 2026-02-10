@@ -16,7 +16,6 @@ def train_validate_and_predict(model, X, y):
     """
     trains a m
     """
-    model.fit(X, y)
 
     #get model name
     model_name = type(model).__name__
@@ -63,13 +62,19 @@ def train_validate_and_predict(model, X, y):
 
 
 #1) Bring the GIS data into Python
+print("\n--------------------------------")
+
 
 gdf = gpd.read_file(".\\Shapefiles\\Study Area.shp")
 # print(gdf.head())
 # print(gdf.info())
-X = gdf.iloc[:,1:2].values
-y = gdf.iloc[:,2].values
+# input()
 
+features = [
+    'AREA', 'BUILDVALUE','POPULATION',
+    'ERQK_AFREQ', 'LNDS_AFREQ', 'SWND_AFREQ', 'WFIR_AFREQ']
+X = gdf[features].values
+y = gdf['BUILD_LOSS'].values
 
 #2) Train and validate models on “Study Area”
 
@@ -81,3 +86,6 @@ train_validate_and_predict(rf_model,X,y)
 train_validate_and_predict(xgb_model,X,y)
 
 #3) Predict for “All Census Tracts” and evaluate testing performance
+
+gdf_all = gpd.read_file(".\\Shapefiles\\All Census Tracts.shp")
+X_all = gdf_all[features].values
